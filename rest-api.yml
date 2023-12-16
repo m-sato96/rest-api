@@ -1,0 +1,26 @@
+openapi: "3.0.3"
+
+info:
+  title: "Sample API"
+  version: "1.0.0"
+
+paths:
+  "/shops/{shopId}/reviews":
+    get:
+      summary: "店舗のレビュー一覧情報取得"
+      description: "店舗のレビュー一覧情報取得します。"
+      tags: ["shops"]
+      parameters:
+        - name: shopId
+          in: path
+          required: true
+          schema: { type: string }
+          example: "woef8aa"
+      responses:
+        "200":
+          description: "Success operation"
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Hello World!!"
