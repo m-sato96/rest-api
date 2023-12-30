@@ -21,6 +21,12 @@ servers:
         default: "dev" # 変数のデフォルト値。この例では'default'を'dev'としています。
         description: "APIをホストする環境。例えば、'dev', 'staging', 'prod'など。" # 任意。変数に関する説明。
         enum: ["dev", "staging", "prod"] # 任意。変数に許可される値のリスト。
+
+tags:
+  - name: "items"
+    description: "アイテムに関連する操作。アイテム取得、作成、更新、削除などでが含まれます。"
+  - name: "users"
+    description: "ユーザー管理に関連する操作。ユーザーの作成、プロファイルの取得、更新などが含まれます。"
 paths:
   /items: # エンドポイント
     get: # HTTPメソッド
@@ -66,8 +72,8 @@ paths:
                   type: string # アイテム説明の型: 文字列
                   description: "アイテムの詳細説明。" # プロパティの説明
             example: # リクエストボディの例
-              name: "新しいアイテム"
-              description: "これは新しいアイテムの説明です。"
+              name: "アイテム1"
+              description: "アイテム1の説明が入ります"
       responses:
         "201": # HTTPステータスコード 201: 作成成功
           description: "新しいアイテムを作成しました。"
@@ -100,3 +106,52 @@ paths:
           description: "不正なリクエスト。パラメータが無効です。"
         "404":
           description: "アイテムが見つかりません。指定されたIDが無効です。"
+
+components:
+  # スキーマ定義: リクエストとレスポンスで使用されるデータ構造を定義します。
+  schemas:
+    Item: # アイテムオブジェクトのスキーマ
+      type: object
+      properties:
+        id:
+          type: string
+          description: "アイテムのユニークID。"
+        name:
+          type: string
+          description: "アイテムの名前。"
+
+  # レスポンス定義: 再利用可能なレスポンスオブジェクトを定義します。
+  responses:
+    NotFound: # 404エラーレスポンス
+      description: "指定されたリソースが見つかりません。"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  # パラメータ定義: 再利用可能なパラメータオブジェクトを定義します。
+  parameters:
+    itemId: # アイテムIDパラメータ
+      name: itemId
+      in: path
+      required: true
+      description: "アイテムのユニークID。"
+      schema:
+        type: string
+
+  # 例定義: スキーマやリクエストの具体的な例を提供します。
+  examples:
+    itemExample: # アイテムのサンプル例
+      summary: "アイテムサンプル"
+      value:
+        id: "item1"
+        name: "アイテム1"
+
+  # リクエストボディ定義: 再利用可能なリクエストボディオブジェクトを定義します。
+  requestBodies:
+    ItemRequest: # アイテム作成リクエストボディ
+      description: "アイテムの新規作成リクエストボディ。"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Item"
