@@ -1,26 +1,102 @@
 openapi: "3.0.3"
 
 info:
-  title: "Sample API"
-  version: "1.0.0"
+  title: "Sample API" # 必須。APIの公式な名前。
+  version: "1.0.0" # 必須。APIのバージョン情報。
+  description: "このAPIはサンプルの操作とデータを提供します。" # 任意。APIの短い説明。
+  termsOfService: "http://example.com/terms/" # 任意。APIの利用規約へのURL。
+  contact: # 任意。APIの連絡先情報。
+    name: "APIサポート" # 任意。連絡先の名前。
+    url: "http://www.example.com/support" # 任意。連絡先のURL。
+    email: "support@example.com" # 任意。連絡先のEメールアドレス。
+  license: # 任意。APIのライセンス情報。
+    name: "Apache 2.0" # 任意。ライセンスの名前。
+    url: "https://www.apache.org/licenses/LICENSE-2.0.html" # 任意。ライセンスURL。
 
+servers:
+  - url: "https://{environment}.example.com/v1" # 動的な部分（{environment}）を含むサーバーURL。
+    description: "APIサーバー - 環境によって異なります"
+    variables: # 任意。URLの動的部分を定義するための変数。
+      environment: # 変数の名前。
+        default: "dev" # 変数のデフォルト値。この例では'default'を'dev'としています。
+        description: "APIをホストする環境。例えば、'dev', 'staging', 'prod'など。" # 任意。変数に関する説明。
+        enum: ["dev", "staging", "prod"] # 任意。変数に許可される値のリスト。
 paths:
-  "/shops/{shopId}/reviews":
+  /items: # エンドポイント
+    get: # HTTPメソッド
+      summary: "アイテム一覧の取得" # 操作の簡単な説明
+      description: "利用可能なアイテムの一覧を返します。" # 操作の詳細な説明
+      tags: ["items"] # タグの付与。ルートオブジェクトで定義したタグ、または任意のタグが付与可能
+      deprecated: false # 廃止されたAPIかどうか。trueにするとグレーアウトされた表示になり廃止済であることを明示できる
+      responses: # レスポンスを定義
+        "200": # HTTPステータスコード 200の場合の処理をこのセクションで定義
+          description: "成功。アイテム一覧を返します。" # この応答の説明
+          content: # レスポンスデータを定義
+            application/json: # レスポンスのコンテントタイプ JSON形式
+              schema: # レスポンスのスキーマを定義するセクション
+                type: array # レスポンスの型: 配列
+                example: # スキーマの例を定義できるセクション
+                  - id: "1"
+                    name: "アイテム1"
+                  - id: "2"
+                    name: "アイテム2"
+                items: # 配列内のアイテムを定義するセクション
+                  type: object # アイテムの型: オブジェクト
+                  properties: # オブジェクトのプロパティを定義するセクション
+                    id: { type: string, description: "アイテムのID。" } # 型と説明
+                    name: { type: string, description: "アイテムの名前。" } # 型と説明
+        "400": # HTTPステータスコード 400の場合の処理をこのセクションで定義
+          description: "不正なリクエスト。パラメータが無効です。" # この応答の説明
+
+    post: # HTTPメソッド
+      summary: "新しいアイテムを作成" # 操作の簡単な説明
+      description: "新しいアイテムを追加します。" # 操作の詳細な説明
+      tags: ["items"] # この操作に関連するタグ
+      requestBody: # リクエストボディを定義
+        required: true # このリクエストでボディが必須
+        content:
+          application/json: # リクエストボディのメディアタイプ
+            schema: # リクエストボディのスキーマを定義
+              type: object # リクエストボディの型: オブジェクト
+              properties: # オブジェクトのプロパティを定義
+                name:
+                  type: string # アイテム名の型: 文字列
+                  description: "アイテムの名前。" # プロパティの説明
+                description:
+                  type: string # アイテム説明の型: 文字列
+                  description: "アイテムの詳細説明。" # プロパティの説明
+            example: # リクエストボディの例
+              name: "新しいアイテム"
+              description: "これは新しいアイテムの説明です。"
+      responses:
+        "201": # HTTPステータスコード 201: 作成成功
+          description: "新しいアイテムを作成しました。"
+        # その他のレスポンスをここに定義します。
+        "400":
+          description: "不正なリクエスト。入力が無効です。"
+
+  /items/{itemId}:
     get:
-      summary: "店舗のレビュー一覧情報取得"
-      description: "店舗のレビュー一覧情報取得します。"
-      tags: ["shops"]
-      parameters:
-        - name: shopId
-          in: path
-          required: true
-          schema: { type: string }
-          example: "woef8aa"
+      summary: "特定のアイテムの詳細情報を取得"
+      description: "指定されたIDを持つアイテムの詳細情報を返します。"
+      tags: ["items"]
+      parameters: # APIリクエストのパラメータを定義するセクション
+        - name: itemId # パラメータのプロパティ名
+          in: path # パラメータの位置: パスパラメータ
+          required: true # 必須パラメータかどうか
+          description: "取得するアイテムのID。" # パラメータの説明
+          schema: { type: string, example: "1021" } # パラメータの型と例。このようにインライン記法もできる
       responses:
         "200":
-          description: "Success operation"
+          description: "成功。指定されたアイテムの詳細情報を返します。"
           content:
             application/json:
               schema:
-                type: string
-                example: "Hello World!!"
+                type: object
+                properties:
+                  id: { type: string, description: "アイテムのID。" }
+                  name: { type: string, description: "アイテムの名前。" }
+        "400":
+          description: "不正なリクエスト。パラメータが無効です。"
+        "404":
+          description: "アイテムが見つかりません。指定されたIDが無効です。"
