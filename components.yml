@@ -1,0 +1,92 @@
+openapi: "3.0.3"
+
+info:
+  title: "サンプルAPI定義"
+  version: "1.0.0"
+  description: "Componentsオブジェクトの使用例を確認するための簡易的API定義"
+
+# グローバルセキュリティ要件: このAPIのすべての操作に適用されます
+# security:
+#   - ApiKeyAuth: [] # ここで定義したセキュリティスキーム名を使用
+
+components:
+  schemas:
+    Item:
+      type: object
+      properties:
+        id:
+          type: string
+          description: "アイテムの一意識別子"
+        name:
+          type: string
+          description: "アイテム名"
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          description: "エラーの種類を表すエラーコード"
+        message:
+          type: string
+          description: "エラー詳細メッセージ"
+  responses:
+    ItemNotFound:
+      description: "Item not found."
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error" # componentsオブジェクト内で定義したErrorスキーマを参照先に指定
+  securitySchemes:
+    ApiKeyAuth: # セキュリティスキームの名前
+      type: apiKey
+      in: header # APIキーがヘッダーに含まれる
+      name: X-API-KEY # ヘッダーの名前
+
+paths:
+  /items:
+    get:
+      summary: "アイテム一覧を取得する"
+      responses:
+        "200":
+          description: "アイテム一覧"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Item" # componentsオブジェクトの中で定義したItemスキーマを参照先に指定
+
+    post:
+      summary: "アイテムを追加する"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Item"
+      responses:
+        "201":
+          description: "アイテム追加"
+      security:
+        - ApiKeyAuth: []
+
+  /items/{itemId}:
+    get:
+      summary: "特定のアイテムを取得"
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          description: "アイテムの一意識別子"
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "アイテム詳細情報"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item" # componentsオブジェクトの中で定義したItemスキーマを参照先に指定
+        "404":
+          $ref: "#/components/responses/ItemNotFound" # componentsオブジェクトの中で定義したItemNotFoundレスポンスを参照先に指定
